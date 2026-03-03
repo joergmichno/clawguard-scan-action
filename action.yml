@@ -1,0 +1,71 @@
+name: 'ClawGuard Shield Scan'
+description: 'Scan your codebase for prompt injection vulnerabilities using ClawGuard Shield API'
+author: 'Joerg Michno'
+
+branding:
+  icon: 'shield'
+  color: 'orange'
+
+inputs:
+  api-key:
+    description: 'Your ClawGuard Shield API key (starts with cgs_)'
+    required: true
+  paths:
+    description: 'Glob patterns for files to scan (newline-separated)'
+    required: false
+    default: |
+      **/*.py
+      **/*.js
+      **/*.ts
+      **/*.yml
+      **/*.yaml
+      **/*.md
+  api-url:
+    description: 'ClawGuard Shield API URL'
+    required: false
+    default: 'https://prompttools.co/api/v1'
+  fail-on:
+    description: 'Minimum severity to fail the check (CRITICAL, HIGH, MEDIUM, LOW, or NONE to never fail)'
+    required: false
+    default: 'HIGH'
+  scan-mode:
+    description: 'What to scan: "prompts" (scan files containing prompt-like content) or "all" (scan all matched files)'
+    required: false
+    default: 'prompts'
+  max-file-size:
+    description: 'Maximum file size in bytes to scan (skip larger files)'
+    required: false
+    default: '50000'
+
+outputs:
+  total-files:
+    description: 'Total number of files scanned'
+  total-findings:
+    description: 'Total number of security findings'
+  max-severity:
+    description: 'Highest severity found (CRITICAL, HIGH, MEDIUM, LOW, or CLEAN)'
+  report:
+    description: 'Path to the full JSON report'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      shell: bash
+      run: pip install requests
+
+    - name: Run ClawGuard Shield scan
+      shell: bash
+      env:
+        CLAWGUARD_API_KEY: ${{ inputs.api-key }}
+        CLAWGUARD_API_URL: ${{ inputs.api-url }}
+        CLAWGUARD_PATHS: ${{ inputs.paths }}
+        CLAWGUARD_FAIL_ON: ${{ inputs.fail-on }}
+        CLAWGUARD_SCAN_MODE: ${{ inputs.scan-mode }}
+        CLAWGUARD_MAX_FILE_SIZE: ${{ inputs.max-file-size }}
+      run: python ${{ github.action_path }}/scan.py

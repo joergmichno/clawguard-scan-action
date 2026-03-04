@@ -117,7 +117,7 @@ That's it. The action will:
 
 ## What It Detects
 
-ClawGuard Shield scans for 38+ threat patterns:
+ClawGuard Shield scans for 42+ threat patterns:
 
 | Category | Examples |
 |----------|---------|
